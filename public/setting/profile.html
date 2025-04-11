@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>设置 - 中国星域</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<meta name="keywords" content="中国星域,星域,星域俱乐部,接档器">
+<meta name="description" content="中国星域接档器是一个快捷方便的欧卡2接档工具。">
+<meta name="author" content="yinqi">
+<link href="../css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/materialdesignicons.min.css" rel="stylesheet">
+<link href="../css/style.min.css" rel="stylesheet">
+<!-- 新增样式库 -->
+<link href="../css/tailwind.min.css" rel="stylesheet">
+<!-- 引入 Font Awesome 图标库 -->
+<link href="../css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/fontawesome-free-6.7.2-web/css/all.min.css">
+<!-- 引入 SweetAlert2 CSS 和 JS -->
+<link rel="stylesheet" href="../css/sweetalert2.min.css">
+<script src="../js/sweetalert2@11"></script>
+<link href="../css/style.css" rel="stylesheet">
+<script src="../js/crypto-js.min.js"></script>
+<script src="../scriptjs/logout-setting.js"></script>
+<script src="../scriptjs/auth-check.js"></script>
+
+<style>
+.avatar-container {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.avatar-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s;
+}
+.avatar-container:hover .avatar-hover {
+  opacity: 1;
+}
+.modal-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+</style>
+
+<script>
+  // 获取设置
+  async function getSettings() {
+    try {
+      const settings = await window.electronAPI.loadSettings();
+      return settings;
+    } catch (error) {
+      console.error('获取设置时出错:', error);
+      return {};
+    }
+  }
+
+  // 修改头像
+  async function updateAvatar() {
+    const newAvatarUrl = document.getElementById('avatar-url').value;
+    if (!newAvatarUrl) {
+      alert('请输入有效的头像URL');
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const data = {
+      id: user.id,
+      newAvatarUrl: newAvatarUrl  // 只需要 ID 和 新头像 URL
+    };
+
+    const jwtToken = localStorage.getItem('jwtToken');
+    const operatorId = localStorage.getItem('operatorId');
+
+    const settings = await getSettings();
+    const SERVER_IP = settings.serverIp || "127.0.0.1";
+    const WORKING_PORT = settings.workingPort || "3000";
+
+    $.ajax({
+      url: `http://${SERVER_IP}:${WORKING_PORT}/user/update-avatar?operator=${encodeURIComponent(operatorId)}`,
+      method: 'POST',
+      contentType: 'application/json',
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+      data: JSON.stringify(data),
+      success: function(response) {
+        if (response.status === 'success') {
+          alert('头像更新成功');
+          localStorage.setItem('avatar', newAvatarUrl);
+          document.querySelectorAll('.avatar').forEach(img => img.src = newAvatarUrl);
+          document.getElementById('avatar-modal').classList.add('hidden');
+          // 显示建议重新登录的提示框
+          showReLoginNotification();
+        } else {
+          alert(response.message || '头像更新失败');
+        }
+      },
+      error: function(xhr) {
+        alert(`错误: ${xhr.statusText}`);
+      }
+    });
+  }
+
+  // 显示建议重新登录的提示框
+  function showReLoginNotification() {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 8000, // 8秒后自动关闭
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+
+    Toast.fire({
+      icon: 'info',
+      title: '建议重新登录以使其他页面更改生效'
+    });
+  }
+
+  // 修改密码
+  async function changePassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    // 密码规则验证
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])[\w\-]{8,}$/;
+    
+    if (!newPassword || !confirmPassword) {
+      alert('请填写所有字段');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('新密码与确认密码不一致');
+      return;
+    }
+
+    if (!passwordRegex.test(newPassword)) {
+      alert('密码必须满足以下要求：\n' +
+            '1. 至少8位长度\n' +
+            '2. 包含大写和小写字母\n' +
+            '3. 允许使用特殊符号 _ 和 -');
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const data = {
+      id: user.id,
+      newPassword: newPassword
+    };
+
+    const jwtToken = localStorage.getItem('jwtToken');
+    const operatorId = localStorage.getItem('operatorId');
+
+    const settings = await getSettings();
+    const SERVER_IP = settings.serverIp || "127.0.0.1";
+    const WORKING_PORT = settings.workingPort || "3000";
+
+    $.ajax({
+      url: `http://${SERVER_IP}:${WORKING_PORT}/user/updatepassword?operator=${encodeURIComponent(operatorId)}`,
+      method: 'POST',
+      contentType: 'application/json',
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      },
+      data: JSON.stringify(data),
+      success: function(response) {
+        if (response.status === 'success') {
+          alert('密码修改成功');
+          document.getElementById('password-form').reset();
+          document.getElementById('password-modal').classList.add('hidden');
+        } else {
+          alert(response.message || '密码修改失败');
+        }
+      },
+      error: function(xhr) {
+        alert(`错误: ${xhr.statusText}`);
+      }
+    });
+  }
+
+  // 页面加载时初始化
+  document.addEventListener('DOMContentLoaded', () => {
+    // 从 localStorage 获取用户信息并填充到输入框中
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+
+    const fields = {
+      'qq-id': user.QQID || '暂无信息',
+      'user-id': user.userid || '暂无信息',
+      'tmp-id': user.tmpID || '未填写',
+      'position': user.adminRole || '暂无信息',
+      'score': user.score || '0'
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    });
+
+    // 设置头像
+    const avatar = localStorage.getItem('avatar') || '../images/users/avatar.jpg';
+    document.querySelectorAll('.avatar').forEach(img => img.src = avatar);
+  });
+
+  // 从 localStorage 获取数据并填充到输入框中
+  window.onload = function() {
+    const avatar = localStorage.getItem('avatar') || '../images/users/avatar.jpg';
+    const QQID = localStorage.getItem('QQID') || '123456789';
+    const userid = localStorage.getItem('userid') || '#000000';
+
+    document.getElementById('user-avatar').src = avatar;
+    document.getElementById('qq-id').value = QQID;
+    document.getElementById('user-id').value = userid;
+  };
+</script>
+</head>
+
+<body>
+<div class="lyear-layout-web">
+  <div class="lyear-layout-container">
+    <!--左侧导航-->
+    <aside class="lyear-layout-sidebar">
+      
+      <!-- logo -->
+      <div id="logo" class="move sidebar-header">
+        <a href="../index.html"><img src="../images/logo.png" class="img-responsive" title="星域" alt="星域" /></a>
+      </div>
+      <div class="lyear-layout-sidebar-scroll"> 
+        
+        <nav class="sidebar-main">
+          <ul class="nav nav-drawer">
+            <li class="nav-item active"> <a href="../index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+            <li class="nav-item active"> <a href="../error.html"><i class="mdi mdi-map-marker-radius"></i> 车队地图</a> </li>
+            <li class="nav-item nav-item-has-subnav">
+                <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 在线查询</a>
+                <ul class="nav nav-subnav">
+                    <li> <a href="../view/finding.html"><i class="mdi mdi-truck"></i> 玩家信息 </a> </li>
+                    <li> <a href="../view/servers.html"><i class="mdi mdi-server-network"></i> 服务器 </a> </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-item-has-subnav" id="adminMenu">
+              <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 管理菜单</a>
+              <ul class="nav nav-subnav">
+                  <li class="nav-item-admin" data-permission="2,3,10,6,7,14,11"> <a href="../view/user-management.html"><i class="mdi mdi-account-multiple"></i> 用户管理 </a></li>
+                  <li class="nav-item-admin" data-permission="4,6,5,12,7,14,13,11"> <a href="../view/event-management.html"><i class="mdi mdi-server-network"></i> 活动管理 </a></li>
+                  <li class="nav-item-admin" data-permission="8,9,10,12,14,13"> <a href="../view/score-management.html"><i class="mdi mdi-account"></i> 积分管理 </a></li>
+                  <li class="nav-item-admin" data-permission="1,9,3,5,7,13,11"> <a href="../view/shop-management.html"><i class="mdi mdi-cart"></i> 商城管理 </a></li>
+              </ul>
+            </li>
+            <li class="nav-item active"> <a href="../view/shop.html"><i class="mdi mdi-lock-outline"></i> 积分商城</a> </li>
+            <li class="nav-item active"> <a href="#"><i class="mdi mdi-account-settings"></i> 设置</a> </li>
+          </ul>
+        </nav>
+
+        <script src="../scriptjs/admin.js"></script>
+        
+        <div class="sidebar-footer">
+          <p class="copyright">
+            Copyright &copy; 2025. 
+            <a target="_blank" href="https://example.com">中国星域俱乐部技术团队</a> 
+            All rights reserved.
+          </p>
+          <p class="copyright">
+              Copyright &copy; 2025. 
+              <a target="_blank" href="../logger.html" id="open-logger">潇宇科技 - 潇潇</a> 
+              All rights reserved.
+          </p>
+          <script>
+            document.getElementById('open-logger').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认跳转行为
+                window.electronAPI.openLoggerWindow(); // 调用 preload 暴露的 API
+            });
+          </script>
+        </div>
+      </div>
+      
+    </aside>
+    <!--End 左侧导航-->
+
+    <!--头部信息-->
+    <header class="lyear-layout-header">
+      
+      <nav class="navbar navbar-default">
+        <div class="topbar">
+          
+          <div class="topbar-left">
+            <div class="lyear-aside-toggler">
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+            </div>
+            <span class="navbar-page-title"> 设置 </span>
+          </div>
+          
+          <ul class="topbar-right">
+            <li class="dropdown dropdown-profile">
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                <img class="avatar img-avatar img-avatar-48 m-r-10" src="../images/users/avatar.jpg" alt="潇潇" onclick="showModal(this)" />
+                <span id="username-display"> <span class="caret"></span></span>
+              </a>
+
+              <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 从localStorage中获取QQID
+                    const QQID = localStorage.getItem('QQID');  // 获取保存在localStorage中的QQID
+        
+                    if (!QQID) {
+                        console.error('未找到QQID，请确保已经登录并保存了QQID');
+                        return;
+                    }
+        
+                    // 发送请求到API
+                    fetch(`https://api.mmp.cc/api/qqname?qq=${encodeURIComponent(QQID)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.code === 200 && data.data && data.data.name) {
+                                // 更新页面上的用户名
+                                const usernameDisplay = document.getElementById('username-display');
+                                if (usernameDisplay) {
+                                    // 清除原有内容
+                                    usernameDisplay.innerHTML = '';
+        
+                                    // 创建新的文本节点并添加到span中
+                                    const textNode = document.createTextNode(`${data.data.name} `);
+                                    usernameDisplay.appendChild(textNode);
+        
+                                    // 添加原有的caret span
+                                    const caretSpan = document.createElement('span');
+                                    caretSpan.className = 'caret';
+                                    usernameDisplay.appendChild(caretSpan);
+                                }
+                            } else {
+                                console.error('无法获取用户名或API返回格式不正确');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('请求失败:', error);
+                        });
+                });
+              </script>
+
+            </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li> <a href="./profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                                <li>
+                    <a href="./profile.html#change-password-section">
+                        <i class="mdi mdi-lock-outline"></i> 修改密码
+                    </a>
+                </li>
+                <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                <li class="divider"></li>
+                <li id="logout-link">
+                  <a href="#"><i class="mdi mdi-logout-variant"></i> 退出登录</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)" onclick="handleCloseApp()">
+                      <i class="mdi mdi-close"></i> 关闭窗口
+                  </a>
+                </li>
+              
+                  <script>
+                      function handleCloseApp() {
+                          // 调用 Electron API 关闭应用程序
+                          window.electronAPI.closeApp();
+                      }
+                  </script>
+              </ul>
+            </li>
+            <!--切换主题配色-->
+		    <li class="dropdown dropdown-skin">
+			  <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+			  <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                <li class="drop-title"><p>主题 ☞ “没啥用的装饰”</p></li>
+                <li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                    <label for="site_theme_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                    <label for="site_theme_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                    <label for="site_theme_3"></label>
+                  </span>
+                </li>
+			    <li class="drop-title"><p>LOGO</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                    <label for="logo_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                    <label for="logo_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                    <label for="logo_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                    <label for="logo_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                    <label for="logo_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                    <label for="logo_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                    <label for="logo_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                    <label for="logo_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>头部</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                    <label for="header_bg_1"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                    <label for="header_bg_2"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                    <label for="header_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                    <label for="header_bg_4"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                    <label for="header_bg_5"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                    <label for="header_bg_6"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                    <label for="header_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                    <label for="header_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>侧边栏</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                    <label for="sidebar_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                    <label for="sidebar_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                    <label for="sidebar_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                    <label for="sidebar_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                    <label for="sidebar_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                    <label for="sidebar_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                    <label for="sidebar_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                    <label for="sidebar_bg_8"></label>
+                  </span>
+				</li>
+			  </ul>
+			</li>
+            <!--切换主题配色-->
+          </ul>
+          
+        </div>
+      </nav>
+      
+    </header>
+  <!--End 头部信息-->
+
+  <!-- 页面主要内容 -->
+  <main class="lyear-layout-content custom-scroll">
+    <!-- 个人信息卡片 -->
+    <div class="container mx-auto p-4 space-y-6">
+      <div class="card bg-white p-6 rounded-xl shadow-xl">
+        <div class="flex flex-col items-center space-y-4">
+          <!-- 头像区域 -->
+          <div class="avatar-container w-32 h-32" onclick="document.getElementById('avatar-modal').classList.remove('hidden')">
+            <img class="avatar w-full h-full rounded-full object-cover" src="" alt="用户头像">
+            <div class="avatar-hover">
+              <span class="text-white font-bold">更换头像</span>
+            </div>
+          </div>
+
+          <!-- 个人信息 -->
+          <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-600 mb-1">QQ号</label>
+              <input id="qq-id" type="text" readonly 
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">用户编号</label>
+              <input id="user-id" type="text" readonly
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">TMP-ID</label>
+              <input id="tmp-id" type="text" readonly
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">职位</label>
+              <input id="position" type="text" readonly
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">车队</label>
+              <input type="text" value="中国星域俱乐部" readonly
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-600 mb-1">积分</label>
+              <input id="score" type="text" readonly
+                     class="w-full p-3 bg-gray-50 border rounded-lg focus:outline-none">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 修改密码卡片 -->
+      <div class="card bg-white p-6 rounded-xl shadow-xl">
+        <div class="version-header p-4 bg-blue-500 rounded-t-lg">
+          <h2 class="text-xl font-bold text-white text-center">
+            <i class="fas fa-lock mr-2"></i>修改密码
+          </h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <button onclick="document.getElementById('password-modal').classList.remove('hidden')"
+                  class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition">
+            修改密码
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 头像修改模态框 -->
+    <div id="avatar-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-96">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">更换头像</h3>
+          <button onclick="document.getElementById('avatar-modal').classList.add('hidden')" 
+                  class="text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        <input id="avatar-url" type="text" placeholder="输入图片URL" class="modal-input mb-4">
+        <div class="flex justify-end space-x-2">
+          <button onclick="document.getElementById('avatar-modal').classList.add('hidden')"
+                  class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">取消</button>
+          <button onclick="updateAvatar()" 
+                  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-96">
+        <div id="change-password-section" class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">修改密码</h3>
+          <button onclick="document.getElementById('password-modal').classList.add('hidden')" 
+                  class="text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        <form id="password-form" class="space-y-4">
+          <div>
+            <label class="block text-gray-600 mb-1">新密码</label>
+            <input id="new-password" type="password" class="modal-input" 
+                   placeholder="8位以上，需包含大小写字母" 
+                   pattern="^(?=.*[a-z])(?=.*[A-Z])[\w\-]{8,}$"
+                   title="必须包含大小写字母，允许使用-_符号">
+            <p class="text-sm text-gray-500 mt-1">支持特殊符号：-_</p>
+          </div>
+          <div>
+            <label class="block text-gray-600 mb-1">确认新密码</label>
+            <input id="confirm-password" type="password" class="modal-input" placeholder="请再次输入新密码">
+          </div>
+          <button type="button" onclick="changePassword()"
+                  class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition">
+            确认修改
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <!--End 页面主要内容-->
+
+    <!-- 自定义模态框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="modal-message" class="text-gray-700">确定要退出登录吗？</p>
+          </div>
+          <div class="flex justify-end space-x-4">
+              <button id="cancel-modal-btn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">取消</button>
+              <button id="confirm-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">确定</button>
+          </div>
+      </div>
+    </div>
+
+    <!-- 自定义模态框 - 错误提示 -->
+    <div id="error-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-error-modal-btn" class="text-gray-500 hover:text-gray-700 transition duration-200 ease-in-out text-xl">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="error-modal-message" class="text-gray-700">请先登录</p>
+          </div>
+          <div class="flex justify-end">
+              <button id="ok-error-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 ease-in-out">确定</button>
+          </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 引入必要的JS库 -->
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../js/main.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    $('.search-bar .dropdown-menu a').click(function() {
+        var field = $(this).data('field') || '';
+        $('#search-field').val(field);
+        $('#search-btn').html($(this).text() + ' <span class="caret"></span>');
+    });
+});
+</script>
+</body>
+</html>

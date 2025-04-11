@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <!-- 引入 Tailwind CSS -->
+    <link href="../css/tailwind.min.css" rel="stylesheet">
+    <!-- 引入 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="../css/fontawesome-free-6.7.2-web/css/all.min.css">
+    <link href="../css/all.min.css" rel="stylesheet">
+    <link href="../css/style1.css" rel="stylesheet">
+
+    <!-- 引入 crypto-js 库 -->
+    <script src="../js/crypto-js.min.js"></script>
+    <style>
+        /* 自定义加载动画样式 */
+        .loader {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #close-btn {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #close-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        /* 添加过渡效果 */
+        .form-group {
+            transition: opacity 0.3s ease, max-height 0.3s ease;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .form-group.hidden {
+            opacity: 0;
+            max-height: 0;
+            pointer-events: none;
+        }
+
+        .border-red-500 { border-color: #ef4444; }
+        .border-green-500 { border-color: #22c55e; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen relative">
+    <button id="close-btn" class="container absolute top-4 right-4 text-xl">&times;</button>
+
+    <div class="container card bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4">
+        <h1 class="text-2xl font-bold text-center mb-4">登录</h1>
+
+        <!-- 登录表单 -->
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">登录方式</label>
+                <div class="mt-2 space-y-2">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="login-method" value="QQID" checked class="form-radio">
+                        <span class="ml-2">QQ号</span>
+                    </label>                    
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="login-method" value="username" class="form-radio">
+                        <span class="ml-2">编号</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- QQID 输入框 -->
+            <div id="QQID-group" class="form-group">
+                <label for="QQID" class="block text-sm font-medium text-gray-700">QQ号</label>
+                <input type="text" id="QQID" name="QQID" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="error-msg mt-1 text-red-500 text-sm hidden">请输入有效的QQ号（5到11位数字）</div>
+            </div>
+
+            <!-- 用户名输入框 -->
+            <div id="username-group" class="form-group hidden">
+                <label for="username" class="block text-sm font-medium text-gray-700">编号</label>
+                <input type="text" id="username" name="username" disabled class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div class="error-msg mt-1 text-red-500 text-sm hidden">请输入有效的编号（仅限数字）</div>
+            </div>
+
+            <div class="relative">
+                <label for="password" class="block text-sm font-medium text-gray-700">密码</label>
+                <div class="mt-1 relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10"
+                    >
+                    <!-- 添加眼睛图标 -->
+                    <i 
+                        class="fas fa-eye-slash absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 cursor-pointer transition-opacity hover:opacity-75"
+                        style="top: 65%; transform: translateY(-50%);"
+                        id="toggle-password"
+                    ></i>
+                </div>
+                <div class="error-msg mt-1 text-red-500 text-sm hidden">密码至少包含一个字母和一个数字，且长度不少于8个字符，支持 - 和 _ 符号</div>
+            </div>
+
+            <!-- 添加记住我选项 -->
+            <div class="flex items-center">
+                <input type="checkbox" id="remember-me" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                <label for="remember-me" class="ml-2 block text-sm text-gray-900">记住账号</label>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline inline-flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                </svg>
+                登录
+            </button>
+        </form>
+
+        <!-- 找回密码跳转链接 -->
+        <div class="text-center mt-4">
+            <p class="text-sm text-gray-600">忘记了密码？ <a href="#" class="text-indigo-600 hover:text-indigo-700">找回密码</a></p>
+        </div>
+    </div>
+
+    <!-- 加载动画 -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+        </div>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div id="error-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-red-600">错误</h3>
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">
+                    &times;
+                </button>
+            </div>
+            <p id="error-message" class="text-gray-700"></p>
+        </div>
+    </div>
+
+    <!-- 引入 jQuery -->
+    <script src="../js/jquery-3.6.0.min.js"></script>
+
+    <script>
+        async function getSettings() {
+            try {
+                const settings = await window.electronAPI.loadSettings();
+                return settings;
+            } catch (error) {
+                console.error('获取设置时出错:', error);
+                return {};
+            }
+        }
+
+        $(document).ready(async function () {
+            const settings = await getSettings();
+            const SERVER_IP = settings.serverIp || "127.0.0.1";
+            const WORKING_PORT = settings.workingPort || "3000";
+
+            // 恢复所有存储数据（强制重新加载）
+            const rememberMe = localStorage.getItem('rememberMe') === 'true';
+            $('#remember-me').prop('checked', rememberMe);
+
+            const savedLoginMethod = localStorage.getItem('loginMethod');
+            const savedAccount = localStorage.getItem('savedAccount');
+            const savedPassword = localStorage.getItem('savedPassword');
+
+            // 登录方式切换逻辑（新增）
+            function handleLoginMethodChange() {
+                const loginMethod = $('input[name="login-method"]:checked').val();
+                
+                // 切换输入框显示
+                $('#QQID-group').toggleClass('hidden', loginMethod !== 'QQID');
+                $('#username-group').toggleClass('hidden', loginMethod !== 'username');
+
+                // 切换输入框启用状态
+                $('#username').prop('disabled', loginMethod !== 'username');
+                $('#QQID').prop('disabled', loginMethod === 'username');
+
+                // 清除未选择输入框的值
+                if (loginMethod === 'QQID') {
+                    $('#username').val('');
+                } else {
+                    $('#QQID').val('');
+                }
+
+                // 清除所有验证状态
+                $('.error-msg').addClass('hidden');
+                $('input').removeClass('border-red-500 border-green-500');
+            }
+
+            // 绑定切换事件
+            $('input[name="login-method"]').on('change', handleLoginMethodChange);
+
+            // 恢复登录方式和账号
+            if (savedLoginMethod && savedAccount) {
+                $(`input[name="login-method"][value="${savedLoginMethod}"]`).prop('checked', true).trigger('change');
+                $(`#${savedLoginMethod}`).val(savedAccount).trigger('blur');
+                
+                // 确保密码恢复
+                if (rememberMe && savedPassword) {
+                    $('#password').val(savedPassword);
+                }
+            }
+
+            // 显示/隐藏密码功能
+            $('#toggle-password').on('click', function() {
+                const passwordInput = $('#password');
+                const isPassword = passwordInput.attr('type') === 'password';
+                passwordInput.attr('type', isPassword ? 'text' : 'password');
+                $(this).toggleClass('fa-eye-slash fa-eye');
+            });
+    
+            // 表单提交处理
+            $('#login-form').on('submit', function (e) {
+                e.preventDefault();
+                const $submitBtn = $(this).find('button[type="submit"]');
+                $submitBtn.prop('disabled', true);
+                $('#loading-overlay').removeClass('hidden');
+
+                const loginMethod = $('input[name="login-method"]:checked').val();
+                const account = $(`#${loginMethod}`).val().trim();
+                const password = $('#password').val().trim(); // 重新获取密码
+    
+                // 验证逻辑
+                const isValid = [
+                    validateField($(`#${loginMethod}`), loginMethod === 'username' ? validateUsername : validateQQID),
+                    validateField($('#password'), validatePassword)
+                ].every(v => v);
+    
+                if (isValid) {
+                    const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+                    const loginData = { [loginMethod]: account, password: hashedPassword };
+    
+                    // 添加请求拦截器处理401错误
+                    $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+                        jqXHR.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('jwtToken')}`);
+                    });
+    
+                    Promise.all([
+                        new Promise(r => setTimeout(r, 3000)),
+                        $.ajax({
+                            url: `http://${SERVER_IP}:${WORKING_PORT}/login`,
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(loginData),
+                            statusCode: {
+                                401: function() {
+                                    handleSessionExpired();
+                                }
+                            }
+                        })
+                    ]).then(([_, res]) => {
+                        if (res.status === 'success') {
+                            // 完整用户数据保存
+                            const saveData = {
+                                user: JSON.stringify(res.user),
+                                jwtToken: res.token,
+                                operatorId: res.user.id,
+                                avatar: res.user.avatar,
+                                QQID: res.user.QQID,
+                                tmpID: res.user.tmpID,
+                                userid: res.user.userid,
+                                adminRole: res.user.adminRole,
+                                score: res.user.score,
+                                userPermissionLevel: res.user.userPermissionLevel
+                            };
+    
+                            Object.entries(saveData).forEach(([k, v]) => localStorage.setItem(k, v));
+                            sessionStorage.setItem('isLoggedIn', 'true');
+                            sessionStorage.setItem('user', JSON.stringify(res.user));
+    
+                            // 记住账号处理
+                            if ($('#remember-me').is(':checked')) {
+                                localStorage.setItem('savedPassword', password); // 使用当前密码
+                                localStorage.setItem('loginMethod', loginMethod);
+                                localStorage.setItem('savedAccount', account);
+                                localStorage.setItem('rememberMe', 'true');
+                            } else {
+                                localStorage.removeItem('savedPassword');
+                                localStorage.removeItem('rememberMe');
+                            }
+    
+                            window.location.href = '../index.html';
+                        } else {
+                            showErrorModal(res.msg || '登录失败');
+                        }
+                    }).catch(handleError).finally(() => {
+                        $('#loading-overlay').addClass('hidden');
+                        $submitBtn.prop('disabled', false);
+                    });
+                } else {
+                    $('#loading-overlay').addClass('hidden');
+                    $submitBtn.prop('disabled', false);
+                }
+            });
+    
+            // 处理会话过期
+            function handleSessionExpired() {
+                localStorage.removeItem('jwtToken');
+                sessionStorage.removeItem('isLoggedIn');
+                showErrorModal('会话已过期，请重新登录');
+                setTimeout(() => window.location.href = './login.html', 2000);
+            }
+    
+            // 辅助函数
+            function showErrorModal(msg) {
+                $('#error-message').text(msg).closest('#error-modal').removeClass('hidden');
+            }
+    
+            function handleError(xhr) {
+                const errorMessage = xhr.status === 401 
+                    ? '身份验证失败，请重新登录'
+                    : xhr.responseJSON?.msg || "网络错误，请重试";
+                showErrorModal(errorMessage);
+            }
+    
+            function validateField($input, validator) {
+                const isValid = validator($input.val().trim());
+                $input.toggleClass('border-red-500', !isValid)
+                      .toggleClass('border-green-500', isValid)
+                      .next('.error-msg').toggleClass('hidden', isValid);
+                return isValid;
+            }
+    
+            // 验证函数
+            const validateUsername = v => /^\d{1,10}$/.test(v);
+            const validateQQID = v => /^\d{5,11}$/.test(v);
+            const validatePassword = v => /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d-_]{8,}$/.test(v);
+        });
+    
+        // 页面初始化逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            // 头像处理
+            const avatar = sessionStorage.getItem('isLoggedIn') === 'true' 
+                ? JSON.parse(sessionStorage.getItem('user'))?.avatar
+                : localStorage.getItem('avatar');
+            if (avatar) updateAvatar(avatar);
+    
+            // 全局401拦截
+            $(document).ajaxComplete(function(event, xhr) {
+                if (xhr.status === 401) {
+                    handleSessionExpired();
+                }
+            });
+        });
+    
+        function updateAvatar(url) {
+            document.querySelector('.img-avatar')?.setAttribute('src', url);
+        }
+    
+        function handleSessionExpired() {
+            localStorage.removeItem('jwtToken');
+            sessionStorage.removeItem('isLoggedIn');
+            alert('会话已过期，请重新登录');
+            window.location.href = './login.html';
+        }
+    </script>
+</body>
+</html>

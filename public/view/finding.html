@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>在线查询 - 中国星域</title>
+  <link rel="icon" href="favicon.ico" type="image/ico">
+  <meta name="keywords" content="中国星域,星域,星域俱乐部,接档器">
+  <meta name="description" content="中国星域接档器是一个快捷方便的欧卡2接档工具。">
+  <meta name="author" content="yinqi">
+  <link href="../css/bootstrap.min.css" rel="stylesheet">
+  <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="../css/style.min.css" rel="stylesheet">
+  <link href="../css/tailwind.min.css" rel="stylesheet">
+  <link href="../css/all.min.css" rel="stylesheet">
+  <link href="../css/style.css" rel="stylesheet">
+  <script src="../scriptjs/logout-setting.js"></script>
+  <script>
+    function showModal(image) {
+      var modal = document.getElementById("modal");
+      var modalImage = document.getElementById("modal-image");
+      modal.style.display = "block";
+      modalImage.src = image.src;
+    }
+
+    function hideModal() {
+      var modal = document.getElementById("modal");
+      modal.style.display = "none";
+    }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      let avatarUrl;
+
+      if (isLoggedIn) {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (user && user.avatar) {
+          avatarUrl = user.avatar;
+        }
+      } else {
+        avatarUrl = localStorage.getItem('avatar');
+      }
+
+      if (avatarUrl) {
+        const avatarImgs = document.querySelectorAll('.avatar');
+        avatarImgs.forEach(function (img) {
+          img.src = avatarUrl;
+        });
+      }
+    });
+
+    function updateAvatar(avatarUrl) {
+      const avatarImgs = document.querySelectorAll('.avatar');
+      avatarImgs.forEach(function (img) {
+        img.src = avatarUrl;
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="lyear-layout-web">
+    <div class="lyear-layout-container">
+      <!-- 左侧导航 -->
+      <aside class="lyear-layout-sidebar">
+        <div id="logo" class="move sidebar-header">
+          <a href="../index.html"><img src="../images/logo.png" class="img-responsive" title="星域" alt="星域" /></a>
+        </div>
+        <div class="lyear-layout-sidebar-scroll">
+          <nav class="sidebar-main">
+            <ul class="nav nav-drawer">
+              <li class="nav-item active"> <a href="../index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+              <li class="nav-item active"> <a href="../error.html"><i class="mdi mdi-map-marker-radius"></i> 车队地图</a> </li>
+              <li class="nav-item nav-item-has-subnav">
+                <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 在线查询</a>
+                <ul class="nav nav-subnav">
+                    <li> <a href="../view/finding.html"><i class="mdi mdi-truck"></i> 玩家信息 </a> </li>
+                    <li> <a href="../view/servers.html"><i class="mdi mdi-server-network"></i> 服务器 </a> </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-item-has-subnav" id="adminMenu">
+              <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 管理菜单</a>
+              <ul class="nav nav-subnav">
+                  <li class="nav-item-admin" data-permission="2,3,10,6,7,14,11"> <a href="../view/user-management.html"><i class="mdi mdi-account-multiple"></i> 用户管理 </a></li>
+                  <li class="nav-item-admin" data-permission="4,6,5,12,7,14,13,11"> <a href="../view/event-management.html"><i class="mdi mdi-server-network"></i> 活动管理 </a></li>
+                  <li class="nav-item-admin" data-permission="8,9,10,12,14,13"> <a href="../view/score-management.html"><i class="mdi mdi-account"></i> 积分管理 </a></li>
+                  <li class="nav-item-admin" data-permission="1,9,3,5,7,13,11"> <a href="../view/shop-management.html"><i class="mdi mdi-cart"></i> 商城管理 </a></li>
+              </ul>
+            </li>
+              <li class="nav-item active"> <a href="../view/shop.html"><i class="mdi mdi-lock-outline"></i> 积分商城</a> </li>
+              <li class="nav-item active"> <a href="../setting/profile.html"><i class="mdi mdi-account-settings"></i> 设置</a> </li>
+            </ul>
+          </nav>
+          <script src="../scriptjs/admin.js"></script>
+          <div class="sidebar-footer">
+            <p class="copyright">
+              Copyright &copy; 2025. 
+              <a target="_blank" href="https://example.com">中国星域俱乐部技术团队</a> 
+              All rights reserved.
+            </p>
+            <p class="copyright">
+              Copyright &copy; 2025. 
+              <a target="_blank" href="https://example.com">潇宇科技 - 潇潇</a> 
+              All rights reserved.
+            </p>
+          </div>
+        </div>
+      </aside>
+      <!-- End 左侧导航 -->
+
+      <!-- 头部信息 -->
+      <header class="lyear-layout-header">
+        <nav class="navbar navbar-default">
+          <div class="topbar">
+            <div class="topbar-left">
+              <div class="lyear-aside-toggler">
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+              </div>
+              <span class="navbar-page-title"> 在线查询 </span>
+            </div>
+            <ul class="topbar-right">
+              <li class="dropdown dropdown-profile">
+                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                  <img class="avatar img-avatar img-avatar-48 m-r-10" src="../images/users/avatar.jpg" alt="潇潇" onclick="showModal(this)" />
+                  <span id="username-display"> <span class="caret"></span></span>
+                </a>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                    const QQID = localStorage.getItem('QQID');
+                    if (!QQID) {
+                      console.error('未找到QQID，请确保已经登录并保存了QQID');
+                      return;
+                    }
+                    fetch(`https://api.mmp.cc/api/qqname?qq=${encodeURIComponent(QQID)}`)
+                      .then(response => response.json())
+                      .then(data => {
+                        if (data && data.code === 200 && data.data && data.data.name) {
+                          const usernameDisplay = document.getElementById('username-display');
+                          if (usernameDisplay) {
+                            usernameDisplay.innerHTML = '';
+                            const textNode = document.createTextNode(`${data.data.name} `);
+                            usernameDisplay.appendChild(textNode);
+                            const caretSpan = document.createElement('span');
+                            caretSpan.className = 'caret';
+                            usernameDisplay.appendChild(caretSpan);
+                          }
+                        } else {
+                          console.error('无法获取用户名或API返回格式不正确');
+                        }
+                      })
+                      .catch(error => {
+                        console.error('请求失败:', error);
+                      });
+                  });
+                </script>
+                <ul class="dropdown-menu dropdown-menu-right">
+                  <li> <a href="../setting/profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                  <li>
+                    <a href="../setting/profile.html#change-password-section">
+                      <i class="mdi mdi-lock-outline"></i> 修改密码
+                    </a>
+                  </li>
+                  <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                  <li class="divider"></li>
+                  <li id="logout-link">
+                    <a href="#"><i class="mdi mdi-logout-variant"></i> 退出登录</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)" onclick="handleCloseApp()">
+                      <i class="mdi mdi-close"></i> 关闭窗口
+                    </a>
+                  </li>
+                  <script>
+                    function handleCloseApp() {
+                      window.electronAPI.closeApp();
+                    }
+                  </script>
+                </ul>
+              </li>
+              <li class="dropdown dropdown-skin">
+                <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+                <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                  <li class="drop-title"><p>主题 ☞ “没啥用的装饰”</p></li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                      <label for="site_theme_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                      <label for="site_theme_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                      <label for="site_theme_3"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title"><p>LOGO</p></li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                      <label for="logo_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                      <label for="logo_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                      <label for="logo_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                      <label for="logo_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                      <label for="logo_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                      <label for="logo_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                      <label for="logo_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                      <label for="logo_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title"><p>头部</p></li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                      <label for="header_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                      <label for="header_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                      <label for="header_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                      <label for="header_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                      <label for="header_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                      <label for="header_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                      <label for="header_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                      <label for="header_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title"><p>侧边栏</p></li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                      <label for="sidebar_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                      <label for="sidebar_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                      <label for="sidebar_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                      <label for="sidebar_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                      <label for="sidebar_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                      <label for="sidebar_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                      <label for="sidebar_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                      <label for="sidebar_bg_8"></label>
+                    </span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!-- End 头部信息 -->
+
+      <!-- 页面主要内容 -->
+      <main class="lyear-layout-content custom-scroll">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-lg-8 mx-auto" style="padding: 0 2rem">
+              <!-- 搜索卡片 -->
+              <div class="card mb-6 shadow-lg rounded-xl">
+                <div class="card-header bg-purple-500 text-white rounded-t-xl">
+                  <h4 class="mb-0 text-xl font-bold"><i class="mdi mdi-account-search mr-2"></i>玩家信息查询</h4>
+                </div>
+                <div class="card-body p-6">
+                  <div class="input-group">
+                    <input type="text" 
+                          id="player-id-input"
+                          class="w-full px-4 py-3 border-2 border-purple-200 rounded-l-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          placeholder="请输入玩家TMP ID 或者 steamID64"
+                          pattern="\d+"
+                          required>
+                    <div class="input-group-append">
+                      <button id="search-btn" 
+                              class="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-r-lg transition-all duration-300"
+                              type="button">
+                        <i class="mdi mdi-magnify mr-2"></i>立即查询
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 玩家信息容器 -->
+              <div id="player-info-container" class="card bg-white rounded-xl shadow-md p-6 w-full h-full flex items-center justify-center">
+                <div id="player-info-content" class="text-center">
+                  <!-- 默认情况下显示的等待查询文本 -->
+                  <p>等待查询</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- End 页面主要内容 -->
+    </div>
+  </div>
+
+  <!-- 自定义模态框 -->
+  <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-red-600">提示</h3>
+        <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">&times;</button>
+      </div>
+      <div class="mb-4">
+        <p id="modal-message" class="text-gray-700">确定要退出登录吗？</p>
+      </div>
+      <div class="flex justify-end space-x-4">
+        <button id="cancel-modal-btn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">取消</button>
+        <button id="confirm-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入 jQuery -->
+  <script src="../js/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+<script>
+  // 防止 XSS 攻击的 HTML 转义函数
+  function escapeHtml(str) {
+    if (str == null) return '';
+    if (typeof str !== 'string') str = String(str);
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+  
+  // 渲染玩家信息
+  function renderPlayerInfo(player) {
+      const container = document.getElementById('player-info-content');
+      container.innerHTML = `
+      <div class="player-info-content">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <img src="${escapeHtml(player.avatar)}" alt="玩家头像" class="player-avatar mb-3">
+            <h4 class="text-purple">${escapeHtml(player.name)}</h4>
+            <p class="text-muted">TMP 编号：${escapeHtml(player.id)}</p>
+          </div>
+          <div class="col-md-8">
+            <div class="player-details">
+              <div class="detail-item">
+                <i class="mdi mdi-calendar-check text-purple mr-2"></i>
+                <span>加入日期：${escapeHtml(player.joinDate)}</span>
+              </div>
+              <div class="detail-item">
+                <i class="mdi mdi-steam text-purple mr-2"></i>
+                <span>Steam ID：${escapeHtml(player.steamID)}</span>
+              </div>
+              <div class="detail-item">
+                <i class="mdi mdi-account-group text-purple mr-2"></i>
+                <span>组名：${escapeHtml(player.groupName)}</span>
+              </div>
+              <div class="detail-item">
+                <i class="mdi mdi-alert-circle text-purple mr-2"></i>
+                <span>是否被封禁：${player.banned ? '<span class="text-danger">是</span>' : '<span class="text-success">否</span>'}</span>
+              </div>
+              ${player.vtc && player.vtc.inVTC ? `
+                <div class="detail-item">
+                  <i class="mdi mdi-truck text-purple mr-2"></i>
+                  <span>VTC：${escapeHtml(player.vtc.name)}</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="mt-4">
+              <h5 class="text-purple"><i class="mdi mdi-trophy-award mr-2"></i>成就信息</h5>
+              <div class="achievements-grid">
+                ${player.achievements && player.achievements.map(ach => `
+                  <div class="achievement-item">
+                    <img src="${escapeHtml(ach.image_url)}" alt="${escapeHtml(ach.title)}" class="achievement-icon">
+                    <div class="achievement-info">
+                      <h6>${escapeHtml(ach.title)}</h6>
+                      <p class="text-muted">${escapeHtml(ach.description)}</p>
+                      <small class="text-muted">获得时间：${escapeHtml(ach.achieved_at)}</small>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+      
+      // 确保玩家信息视图是显示的
+      document.getElementById('player-info-container').style.display = 'block';
+    }
+  
+  // 统一查询函数
+  async function searchPlayer() {
+    const playerId = document.getElementById('player-id-input').value.trim();
+    if (!playerId || isNaN(playerId)) return alert('请输入有效编号');
+  
+    try {
+      const settings = await window.electronAPI?.loadSettings?.() || { 
+        serverIp: '127.0.0.1', 
+        workingPort: '3000' 
+      };
+  
+      const res = await fetch(
+        `http://${settings.serverIp}:${settings.workingPort}/player/${playerId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('jwtToken')}` } }
+      );
+  
+      if (!res.ok) throw new Error(`请求失败: ${res.status}`);
+      const { data } = await res.json();
+      renderPlayerInfo(data.response); // 仅渲染玩家信息
+  
+    } catch (error) {
+      alert(error.message);
+      console.error(error);
+    }
+  }
+  
+  // 事件绑定
+  document.getElementById('search-btn').addEventListener('click', searchPlayer);
+  document.getElementById('player-id-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') searchPlayer();
+  });
+</script>
+
+<style>
+  /* 通用样式 */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+  }
+
+  /* 搜索卡片样式 */
+  .card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+  }
+
+  .card-header {
+    background: #6a1b9a;
+    color: white;
+    padding: 16px 24px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .card-header h4 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .card-body {
+    padding: 24px;
+  }
+
+  /* 输入框和按钮样式 */
+  .input-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .input-group input:focus {
+    border-color: #6a1b9a;
+  }
+
+  .input-group button {
+    padding: 12px 24px;
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .input-group button:hover {
+    background: #7b1fa2;
+  }
+
+  /* 玩家信息容器样式 */
+  #player-info-container {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 24px; /* 增加与搜索卡的间距 */
+  }
+
+  /* 确保外部容器使用flex布局 */
+  .player-info-content .col-md-4 {
+      display: flex;
+      justify-content: center; /* 水平居中 */
+      align-items: center; /* 垂直居中 */
+      flex-direction: column; /* 子元素垂直排列 */
+  }
+
+  /* 头像样式 */
+  .player-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid #6a1b9a;
+      margin-bottom: 16px;
+  }
+
+  .player-details .detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .player-details .detail-item i {
+    font-size: 20px;
+    color: #6a1b9a;
+    margin-right: 12px;
+  }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .achievement-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+  }
+
+  .achievement-item:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .achievement-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    margin-right: 12px;
+  }
+
+  .achievement-info h6 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .achievement-info p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .achievement-info small {
+    font-size: 12px;
+    color: #999;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .input-group {
+      flex-direction: column;
+    }
+
+    .input-group button {
+      width: 100%;
+    }
+
+    .player-avatar {
+      width: 100px;
+      height: 100px;
+    }
+
+    .player-details .detail-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .achievements-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+  }
+
+  /* 布局优化 */
+  .lyear-layout-content .container-fluid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .col-lg-8.mx-auto {
+    max-width: 1200px; /* 控制最大宽度 */
+    width: 100%;
+  }
+</style>
+
+  <script type="text/javascript" src="../js/jquery.min.js"></script>
+  <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../js/perfect-scrollbar.min.js"></script>
+  <script type="text/javascript" src="../js/main.min.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      $('.search-bar .dropdown-menu a').click(function() {
+        var field = $(this).data('field') || '';
+        $('#search-field').val(field);
+        $('#search-btn').html($(this).text() + ' <span class="caret"></span>');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>积分商城 - 中国星域</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<meta name="keywords" content="中国星域,星域,星域俱乐部,接档器">
+<meta name="description" content="中国星域接档器是一个快捷方便的欧卡2接档工具。">
+<meta name="author" content="yinqi">
+<link href="../css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/materialdesignicons.min.css" rel="stylesheet">
+<link href="../css/style.min.css" rel="stylesheet">
+<!-- 新增样式库 -->
+<link href="../css/tailwind.min.css" rel="stylesheet">
+<!-- 引入 Font Awesome 图标库 -->
+<link href="../css/all.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">
+<script src="../scriptjs/logout-setting.js"></script>
+<script src="../scriptjs/auth-check.js"></script>
+
+<script>
+  function showModal(image) {
+      var modal = document.getElementById("modal");
+      var modalImage = document.getElementById("modal-image");
+      modal.style.display = "block";
+      modalImage.src = image.src;
+  }
+                 
+  function hideModal() {
+      var modal = document.getElementById("modal");
+      modal.style.display = "none";
+  }
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // 检查是否已登录并获取头像链接
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      let avatarUrl;
+
+      if (isLoggedIn) {
+          const user = JSON.parse(sessionStorage.getItem('user'));
+          if (user && user.avatar) {
+              avatarUrl = user.avatar;
+          }
+      } else {
+          avatarUrl = localStorage.getItem('avatar');
+      }
+
+      // 如果有头像链接，则更新页面中的所有 img-avatar 元素
+      if (avatarUrl) {
+          const avatarImgs = document.querySelectorAll('.avatar');
+          avatarImgs.forEach(function (img) {
+              img.src = avatarUrl;
+          });
+      }
+  });
+
+  // 更新头像函数
+  function updateAvatar(avatarUrl) {
+      const avatarImgs = document.querySelectorAll('.avatar');
+      avatarImgs.forEach(function (img) {
+          img.src = avatarUrl;
+      });
+  }
+</script>
+
+<style>
+  /* 网格入场动画 */
+  @keyframes gridEntrance {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 卡片入场动画 */
+  .activity-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardEntrance 0.6s ease forwards;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  @keyframes cardEntrance {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 为每个卡片添加延迟动画 */
+  .activity-card:nth-child(1) { animation-delay: 0.2s; }
+  .activity-card:nth-child(2) { animation-delay: 0.4s; }
+  .activity-card:nth-child(3) { animation-delay: 0.6s; }
+  .activity-card:nth-child(4) { animation-delay: 0.8s; }
+  .activity-card:nth-child(5) { animation-delay: 1.0s; }
+  .activity-card:nth-child(6) { animation-delay: 1.2s; }
+
+  /* 卡片排序时的平滑过渡 */
+  .activity-grid {
+    transition: grid-template-columns 0.3s ease-in-out, gap 0.3s ease-in-out;
+  }
+
+  .activity-card {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .activity-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+  }
+</style>
+
+</head>
+  
+<body>
+<div class="lyear-layout-web">
+  <div class="lyear-layout-container">
+    <!--左侧导航-->
+    <aside class="lyear-layout-sidebar">
+      
+      <!-- logo -->
+      <div id="logo" class="move sidebar-header">
+        <a href="../index.html"><img src="../images/logo.png" class="img-responsive" title="星域" alt="星域" /></a>
+      </div>
+      <div class="lyear-layout-sidebar-scroll"> 
+        
+        <nav class="sidebar-main">
+          <ul class="nav nav-drawer">
+            <li class="nav-item active"> <a href="../index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+            <li class="nav-item active"> <a href="../error.html"><i class="mdi mdi-map-marker-radius"></i> 车队地图</a> </li>
+            <li class="nav-item nav-item-has-subnav">
+                <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 在线查询</a>
+                <ul class="nav nav-subnav">
+                    <li> <a href="../view/finding.html"><i class="mdi mdi-truck"></i> 玩家信息 </a> </li>
+                    <li> <a href="../view/servers.html"><i class="mdi mdi-server-network"></i> 服务器 </a> </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-item-has-subnav" id="adminMenu">
+              <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 管理菜单</a>
+              <ul class="nav nav-subnav">
+                  <li class="nav-item-admin" data-permission="2,3,10,6,7,14,11"> <a href="../view/user-management.html"><i class="mdi mdi-account-multiple"></i> 用户管理 </a></li>
+                  <li class="nav-item-admin" data-permission="4,6,5,12,7,14,13,11"> <a href="../view/event-management.html"><i class="mdi mdi-server-network"></i> 活动管理 </a></li>
+                  <li class="nav-item-admin" data-permission="8,9,10,12,14,13"> <a href="../view/score-management.html"><i class="mdi mdi-account"></i> 积分管理 </a></li>
+                  <li class="nav-item-admin" data-permission="1,9,3,5,7,13,11"> <a href="../view/shop-management.html"><i class="mdi mdi-cart"></i> 商城管理 </a></li>
+              </ul>
+            </li>
+            <li class="nav-item active"> <a href="../view/shop.html"><i class="mdi mdi-lock-outline"></i> 积分商城</a> </li>
+            <li class="nav-item active"> <a href="../setting/profile.html"><i class="mdi mdi-account-settings"></i> 设置</a> </li>
+          </ul>
+        </nav>
+
+        <script src="../scriptjs/admin.js"></script>
+        
+        <div class="sidebar-footer">
+          <p class="copyright">
+            Copyright &copy; 2025. 
+            <a target="_blank" href="https://example.com">中国星域俱乐部技术团队</a> 
+            All rights reserved.
+          </p>
+          <p class="copyright">
+              Copyright &copy; 2025. 
+              <a target="_blank" href="../logger.html" id="open-logger">潇宇科技 - 潇潇</a> 
+              All rights reserved.
+          </p>
+          <script>
+            document.getElementById('open-logger').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认跳转行为
+                window.electronAPI.openLoggerWindow(); // 调用 preload 暴露的 API
+            });
+          </script>
+        </div>
+      </div>
+      
+    </aside>
+    <!--End 左侧导航-->
+    
+    <!--头部信息-->
+    <header class="lyear-layout-header">
+      
+      <nav class="navbar navbar-default">
+        <div class="topbar">
+          
+          <div class="topbar-left">
+            <div class="lyear-aside-toggler">
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+            </div>
+            <span class="navbar-page-title"> 积分商城 </span>
+          </div>
+          
+          <ul class="topbar-right">
+            <li class="dropdown dropdown-profile">
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                <img class="avatar img-avatar img-avatar-48 m-r-10" src="../images/users/avatar.jpg" alt="潇潇" onclick="showModal(this)" />
+                <span id="username-display"> <span class="caret"></span></span>
+              </a>
+
+              <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 从localStorage中获取QQID
+                    const QQID = localStorage.getItem('QQID');  // 获取保存在localStorage中的QQID
+        
+                    if (!QQID) {
+                        console.error('未找到QQID，请确保已经登录并保存了QQID');
+                        return;
+                    }
+        
+                    // 发送请求到API
+                    fetch(`https://api.mmp.cc/api/qqname?qq=${encodeURIComponent(QQID)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.code === 200 && data.data && data.data.name) {
+                                // 更新页面上的用户名
+                                const usernameDisplay = document.getElementById('username-display');
+                                if (usernameDisplay) {
+                                    // 清除原有内容
+                                    usernameDisplay.innerHTML = '';
+        
+                                    // 创建新的文本节点并添加到span中
+                                    const textNode = document.createTextNode(`${data.data.name} `);
+                                    usernameDisplay.appendChild(textNode);
+        
+                                    // 添加原有的caret span
+                                    const caretSpan = document.createElement('span');
+                                    caretSpan.className = 'caret';
+                                    usernameDisplay.appendChild(caretSpan);
+                                }
+                            } else {
+                                console.error('无法获取用户名或API返回格式不正确');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('请求失败:', error);
+                        });
+                });
+              </script>
+
+            </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li> <a href="../setting/profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                                <li>
+                    <a href="../setting/profile.html#change-password-section">
+                        <i class="mdi mdi-lock-outline"></i> 修改密码
+                    </a>
+                </li>
+                <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                <li class="divider"></li>
+                <li id="logout-link">
+                  <a href="#"><i class="mdi mdi-logout-variant"></i> 退出登录</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)" onclick="handleCloseApp()">
+                      <i class="mdi mdi-close"></i> 关闭窗口
+                  </a>
+                </li>
+              
+                  <script>
+                      function handleCloseApp() {
+                          // 调用 Electron API 关闭应用程序
+                          window.electronAPI.closeApp();
+                      }
+                  </script>
+              </ul>
+            </li>
+            <!--切换主题配色-->
+		    <li class="dropdown dropdown-skin">
+			  <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+			  <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                <li class="drop-title"><p>主题 ☞ “没啥用的装饰”</p></li>
+                <li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                    <label for="site_theme_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                    <label for="site_theme_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                    <label for="site_theme_3"></label>
+                  </span>
+                </li>
+			    <li class="drop-title"><p>LOGO</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                    <label for="logo_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                    <label for="logo_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                    <label for="logo_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                    <label for="logo_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                    <label for="logo_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                    <label for="logo_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                    <label for="logo_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                    <label for="logo_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>头部</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                    <label for="header_bg_1"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                    <label for="header_bg_2"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                    <label for="header_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                    <label for="header_bg_4"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                    <label for="header_bg_5"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                    <label for="header_bg_6"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                    <label for="header_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                    <label for="header_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>侧边栏</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                    <label for="sidebar_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                    <label for="sidebar_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                    <label for="sidebar_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                    <label for="sidebar_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                    <label for="sidebar_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                    <label for="sidebar_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                    <label for="sidebar_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                    <label for="sidebar_bg_8"></label>
+                  </span>
+				</li>
+			  </ul>
+			</li>
+            <!--切换主题配色-->
+          </ul>
+          
+        </div>
+      </nav>
+      
+    </header>
+    <!--End 头部信息-->
+    
+    <!--页面主要内容-->
+    <main class="lyear-layout-content custom-scroll">
+      <div class="container mx-auto p-4">
+        <!-- 商品式卡片容器 -->
+        <div id="activity-grid" class="activity-grid" 
+             style="display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 2rem;
+                    padding: 2rem;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    animation: gridEntrance 0.8s ease forwards;">
+        </div>
+      </div>
+    </main>
+
+    <script>  
+      document.addEventListener('DOMContentLoaded', async () => {
+        // 获取设置
+        async function getSettings() {
+          try {
+            return await window.electronAPI.loadSettings();
+          } catch (error) {
+            console.error('获取设置时出错:', error);
+            return {};
+          }
+        }
+    
+        try {
+          const settings = await getSettings();
+          SERVER_IP = settings.serverIp || "127.0.0.1";
+          WORKING_PORT = settings.workingPort || "3000";
+    
+          // 初始化加载商品数据
+          fetchShopData();
+    
+        } catch (error) {
+          console.error('初始化失败:', error);
+          alert('系统初始化失败');
+        }
+      });
+    
+      // 获取商品数据
+      async function fetchShopData() {
+        try {
+          const jwtToken = localStorage.getItem('jwtToken');
+          const operatorId = localStorage.getItem('operatorId');
+    
+          if (!jwtToken || !operatorId) {
+            alert('请先登录');
+            return;
+          }
+    
+          const response = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/pointshop?operator=${encodeURIComponent(operatorId)}`, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+          });
+          const result = await response.json();
+    
+          if (result.status !== 'success') {
+            throw new Error('获取商品数据失败');
+          }
+    
+          const shops = result.data;
+          const activityGrid = document.getElementById('activity-grid');
+          activityGrid.innerHTML = '';
+    
+          shops.forEach((shop, index) => {
+            const card = createActivityCard(shop, index, operatorId);
+            activityGrid.appendChild(card);
+          });
+    
+          // 触发动画
+          setTimeout(() => {
+            activityGrid.style.opacity = '1';
+            activityGrid.style.transform = 'translateY(0)';
+          }, 100);
+        } catch (error) {
+          console.error('获取商品数据失败:', error);
+          alert('获取商品数据失败，请稍后重试');
+        }
+      }
+    
+      // 创建商品卡片
+      function createActivityCard(shop, index, operatorId) {
+        const card = document.createElement('div');
+        card.className = 'activity-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out flex flex-col';
+    
+        // 封面图
+        const header = document.createElement('div');
+        header.className = 'card-header relative h-48 bg-gray-200 overflow-hidden';
+        const img = document.createElement('img');
+        img.src = shop.image || `https://source.unsplash.com/random/800x600?${index}`;
+        img.className = 'w-full h-full object-cover transform hover:scale-105 transition-transform duration-300';
+        img.alt = shop.name;
+        header.appendChild(img);
+    
+        const badge = document.createElement('div');
+        badge.className = `badge absolute top-2 right-2 bg-${shop.isEnable ? 'red' : 'green'}-500 text-white px-3 py-1 rounded-full text-sm`;
+        badge.textContent = shop.isEnable ? '可兑换' : '已下架';
+        header.appendChild(badge);
+    
+        card.appendChild(header);
+    
+        // 内容区域
+        const content = document.createElement('div');
+        content.className = 'card-content p-4 flex flex-col gap-3 flex-grow';
+    
+        const title = document.createElement('h3');
+        title.className = 'text-xl font-bold text-gray-800 truncate';
+        title.textContent = shop.name;
+        content.appendChild(title);
+    
+        const description = document.createElement('p');
+        description.className = 'text-sm text-gray-600';
+        description.textContent = shop.description;
+        content.appendChild(description);
+    
+        // 价格信息
+        const info = document.createElement('div');
+        info.className = 'activity-info space-y-2 text-gray-600';
+        const priceDiv = document.createElement('div');
+        priceDiv.className = 'flex items-center';
+        priceDiv.innerHTML = `<i class="mdi mdi-currency-cny text-green-500 mr-2"></i><span>价格: ${shop.price} 积分</span>`;
+        info.appendChild(priceDiv);
+        content.appendChild(info);
+    
+        // 库存信息
+        const stockContainer = document.createElement('div');
+        stockContainer.className = 'mt-4';
+        const stockText = document.createElement('div');
+        stockText.className = 'text-sm text-gray-500 mb-1';
+        stockText.textContent = `库存: ${shop.quantity}`;
+        
+        const progressBar = document.createElement('div');
+        progressBar.className = 'h-2 bg-gray-200 rounded-full overflow-hidden';
+        const progressFill = document.createElement('div');
+        progressFill.className = 'h-full bg-gradient-to-r from-blue-400 to-purple-500';
+        progressFill.style.width = `${(shop.quantity / 100) * 100}%`; // 假设最大库存100
+        
+        progressBar.appendChild(progressFill);
+        stockContainer.appendChild(stockText);
+        stockContainer.appendChild(progressBar);
+        content.appendChild(stockContainer);
+    
+        card.appendChild(content);
+    
+        // 底部按钮
+        const footer = document.createElement('div');
+        footer.className = 'card-footer p-4 bg-gray-50 border-t mt-auto';
+        const button = document.createElement('button');
+        button.className = `w-full btn-primary px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-purple-500 hover:to-blue-500 transition-all ${!shop.isEnable ? 'disabled' : ''}`;
+        button.textContent = shop.isEnable ? '立即兑换' : '已下架';
+        
+        if (shop.isEnable) {
+          button.addEventListener('click', () => handlePurchase(shop.id, operatorId));
+        } else {
+          button.disabled = true;
+        }
+    
+        footer.appendChild(button);
+        card.appendChild(footer);
+    
+        return card;
+      }
+    
+      // 处理兑换请求
+      async function handlePurchase(goodsID, operatorId) {
+        try {
+          const jwtToken = localStorage.getItem('jwtToken');
+    
+          if (!jwtToken || !operatorId) {
+            alert('请先登录');
+            return;
+          }
+    
+          const response = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/purchase-item?operator=${encodeURIComponent(operatorId)}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${jwtToken}`
+            },
+            body: JSON.stringify({ goodsID, ID: operatorId })
+          });
+    
+          const result = await response.json();
+    
+          if (result.status === 'success') {
+            alert('兑换成功！');
+            fetchShopData(); // 刷新列表
+          } else {
+            alert(`兑换失败: ${result.message || '未知错误'}`);
+          }
+        } catch (error) {
+          console.error('兑换失败:', error);
+          alert('兑换失败，请稍后重试');
+        }
+      }
+    </script>
+
+    <!-- 自定义模态框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="modal-message" class="text-gray-700">确定要退出登录吗？</p>
+          </div>
+          <div class="flex justify-end space-x-4">
+              <button id="cancel-modal-btn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">取消</button>
+              <button id="confirm-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">确定</button>
+          </div>
+      </div>
+    </div>
+
+    <!-- 自定义模态框 - 错误提示 -->
+    <div id="error-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-error-modal-btn" class="text-gray-500 hover:text-gray-700 transition duration-200 ease-in-out text-xl">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="error-modal-message" class="text-gray-700">请先登录</p>
+          </div>
+          <div class="flex justify-end">
+              <button id="ok-error-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 ease-in-out">确定</button>
+          </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 引入 jQuery -->
+<script src="../js/jquery-3.6.0.min.js"></script>
+<script src="../js/tus.js"></script>
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../js/main.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    $('.search-bar .dropdown-menu a').click(function() {
+        var field = $(this).data('field') || '';
+        $('#search-field').val(field);
+        $('#search-btn').html($(this).text() + ' <span class="caret"></span>');
+    });
+});
+</script>
+</body>
+</html>

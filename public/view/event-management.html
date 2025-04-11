@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>活动管理 - 中国星域</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<meta name="keywords" content="中国星域,星域,星域俱乐部,接档器">
+<meta name="description" content="中国星域接档器是一个快捷方便的欧卡2接档工具。">
+<meta name="author" content="yinqi">
+<link href="../css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/materialdesignicons.min.css" rel="stylesheet">
+<link href="../css/style.min.css" rel="stylesheet">
+<!-- 新增样式库 -->
+<link href="../css/tailwind.min.css" rel="stylesheet">
+<!-- 引入 Font Awesome 图标库 -->
+<link href="../css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/fontawesome-free-6.7.2-web/css/all.min.css">
+<link href="../css/style.css" rel="stylesheet">
+<script src="../scriptjs/logout-setting.js"></script>
+<script src="../scriptjs/auth-check.js"></script>
+
+<script>
+  function showModal(image) {
+      var modal = document.getElementById("modal");
+      var modalImage = document.getElementById("modal-image");
+      modal.style.display = "block";
+      modalImage.src = image.src;
+  }
+                 
+  function hideModal() {
+      var modal = document.getElementById("modal");
+      modal.style.display = "none";
+  }
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // 检查是否已登录并获取头像链接
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      let avatarUrl;
+
+      if (isLoggedIn) {
+          const user = JSON.parse(sessionStorage.getItem('user'));
+          if (user && user.avatar) {
+              avatarUrl = user.avatar;
+          }
+      } else {
+          avatarUrl = localStorage.getItem('avatar');
+      }
+
+      // 如果有头像链接，则更新页面中的所有 img-avatar 元素
+      if (avatarUrl) {
+          const avatarImgs = document.querySelectorAll('.avatar');
+          avatarImgs.forEach(function (img) {
+              img.src = avatarUrl;
+          });
+      }
+  });
+
+  // 更新头像函数
+  function updateAvatar(avatarUrl) {
+      const avatarImgs = document.querySelectorAll('.avatar');
+      avatarImgs.forEach(function (img) {
+          img.src = avatarUrl;
+      });
+  }
+</script>
+
+</head>
+  
+<body>
+<div class="lyear-layout-web">
+  <div class="lyear-layout-container">
+    <!--左侧导航-->
+    <aside class="lyear-layout-sidebar">
+      
+      <!-- logo -->
+      <div id="logo" class="move sidebar-header">
+        <a href="../index.html"><img src="../images/logo.png" class="img-responsive" title="星域" alt="星域" /></a>
+      </div>
+      <div class="lyear-layout-sidebar-scroll"> 
+        
+        <nav class="sidebar-main">
+          <ul class="nav nav-drawer">
+            <li class="nav-item active"> <a href="../index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+            <li class="nav-item active"> <a href="../error.html"><i class="mdi mdi-map-marker-radius"></i> 车队地图</a> </li>
+            <li class="nav-item nav-item-has-subnav">
+                <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 在线查询</a>
+                <ul class="nav nav-subnav">
+                    <li> <a href="../view/finding.html"><i class="mdi mdi-truck"></i> 玩家信息 </a> </li>
+                    <li> <a href="../view/servers.html"><i class="mdi mdi-server-network"></i> 服务器 </a> </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-item-has-subnav" id="adminMenu">
+              <a href="javascript:void(0)"><i class="mdi mdi-menu"></i> 管理菜单</a>
+              <ul class="nav nav-subnav">
+                  <li class="nav-item-admin" data-permission="2,3,10,6,7,14,11"> <a href="../view/user-management.html"><i class="mdi mdi-account-multiple"></i> 用户管理 </a></li>
+                  <li class="nav-item-admin" data-permission="4,6,5,12,7,14,13,11"> <a href="../view/event-management.html"><i class="mdi mdi-server-network"></i> 活动管理 </a></li>
+                  <li class="nav-item-admin" data-permission="8,9,10,12,14,13"> <a href="../view/score-management.html"><i class="mdi mdi-account"></i> 积分管理 </a></li>
+                  <li class="nav-item-admin" data-permission="1,9,3,5,7,13,11"> <a href="../view/shop-management.html"><i class="mdi mdi-cart"></i> 商城管理 </a></li>
+              </ul>
+            </li>
+            <li class="nav-item active"> <a href="../view/shop.html"><i class="mdi mdi-lock-outline"></i> 积分商城</a> </li>
+            <li class="nav-item active"> <a href="../setting/profile.html"><i class="mdi mdi-account-settings"></i> 设置</a> </li>
+          </ul>
+        </nav>
+
+        <script src="../scriptjs/admin.js"></script>
+        
+        <div class="sidebar-footer">
+          <p class="copyright">
+            Copyright &copy; 2025. 
+            <a target="_blank" href="https://example.com">中国星域俱乐部技术团队</a> 
+            All rights reserved.
+          </p>
+          <p class="copyright">
+              Copyright &copy; 2025. 
+              <a target="_blank" href="../logger.html" id="open-logger">潇宇科技 - 潇潇</a> 
+              All rights reserved.
+          </p>
+          <script>
+            document.getElementById('open-logger').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认跳转行为
+                window.electronAPI.openLoggerWindow(); // 调用 preload 暴露的 API
+            });
+          </script>
+        </div>
+      </div>
+      
+    </aside>
+    <!--End 左侧导航-->
+    
+    <!--头部信息-->
+    <header class="lyear-layout-header">
+      
+      <nav class="navbar navbar-default">
+        <div class="topbar">
+          
+          <div class="topbar-left">
+            <div class="lyear-aside-toggler">
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+              <span class="lyear-toggler-bar"></span>
+            </div>
+            <span class="navbar-page-title"> 活动管理 </span>
+          </div>
+          
+          <ul class="topbar-right">
+            <li class="dropdown dropdown-profile">
+              <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                <img class="avatar img-avatar img-avatar-48 m-r-10" src="../images/users/avatar.jpg" alt="潇潇" onclick="showModal(this)" />
+                <span id="username-display"> <span class="caret"></span></span>
+              </a>
+
+              <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 从localStorage中获取QQID
+                    const QQID = localStorage.getItem('QQID');  // 获取保存在localStorage中的QQID
+        
+                    if (!QQID) {
+                        console.error('未找到QQID，请确保已经登录并保存了QQID');
+                        return;
+                    }
+        
+                    // 发送请求到API
+                    fetch(`https://api.mmp.cc/api/qqname?qq=${encodeURIComponent(QQID)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.code === 200 && data.data && data.data.name) {
+                                // 更新页面上的用户名
+                                const usernameDisplay = document.getElementById('username-display');
+                                if (usernameDisplay) {
+                                    // 清除原有内容
+                                    usernameDisplay.innerHTML = '';
+        
+                                    // 创建新的文本节点并添加到span中
+                                    const textNode = document.createTextNode(`${data.data.name} `);
+                                    usernameDisplay.appendChild(textNode);
+        
+                                    // 添加原有的caret span
+                                    const caretSpan = document.createElement('span');
+                                    caretSpan.className = 'caret';
+                                    usernameDisplay.appendChild(caretSpan);
+                                }
+                            } else {
+                                console.error('无法获取用户名或API返回格式不正确');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('请求失败:', error);
+                        });
+                });
+              </script>
+
+            </a>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li> <a href="../setting/profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                                <li>
+                    <a href="../setting/profile.html#change-password-section">
+                        <i class="mdi mdi-lock-outline"></i> 修改密码
+                    </a>
+                </li>
+                <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                <li class="divider"></li>
+                <li id="logout-link">
+                  <a href="#"><i class="mdi mdi-logout-variant"></i> 退出登录</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)" onclick="handleCloseApp()">
+                      <i class="mdi mdi-close"></i> 关闭窗口
+                  </a>
+                </li>
+              
+                  <script>
+                      function handleCloseApp() {
+                          // 调用 Electron API 关闭应用程序
+                          window.electronAPI.closeApp();
+                      }
+                  </script>
+              </ul>
+            </li>
+            <!--切换主题配色-->
+		    <li class="dropdown dropdown-skin">
+			  <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+			  <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                <li class="drop-title"><p>主题 ☞ “没啥用的装饰”</p></li>
+                <li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                    <label for="site_theme_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                    <label for="site_theme_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                    <label for="site_theme_3"></label>
+                  </span>
+                </li>
+			    <li class="drop-title"><p>LOGO</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                    <label for="logo_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                    <label for="logo_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                    <label for="logo_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                    <label for="logo_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                    <label for="logo_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                    <label for="logo_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                    <label for="logo_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                    <label for="logo_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>头部</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                    <label for="header_bg_1"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                    <label for="header_bg_2"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                    <label for="header_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                    <label for="header_bg_4"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                    <label for="header_bg_5"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                    <label for="header_bg_6"></label>                      
+                  </span>                                                    
+                  <span>                                                     
+                    <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                    <label for="header_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                    <label for="header_bg_8"></label>
+                  </span>
+				</li>
+				<li class="drop-title"><p>侧边栏</p></li>
+				<li class="drop-skin-li clearfix">
+                  <span class="inverse">
+                    <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                    <label for="sidebar_bg_1"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                    <label for="sidebar_bg_2"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                    <label for="sidebar_bg_3"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                    <label for="sidebar_bg_4"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                    <label for="sidebar_bg_5"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                    <label for="sidebar_bg_6"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                    <label for="sidebar_bg_7"></label>
+                  </span>
+                  <span>
+                    <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                    <label for="sidebar_bg_8"></label>
+                  </span>
+				</li>
+			  </ul>
+			</li>
+            <!--切换主题配色-->
+          </ul>
+          
+        </div>
+      </nav>
+      
+    </header>
+    <!--End 头部信息-->
+    
+    <!--页面主要内容-->
+    <main class="lyear-layout-content custom-scroll">
+      
+      <!--顶部滚动公告-->
+      <style type="text/css">
+        .studytextgzbox {
+          background: #F9F9F9;
+          border: 1px solid #999999;
+          margin: 1px;
+          text-align: center;
+          float: left;
+          line-height: 28px;
+          height: 28px;
+          overflow: hidden;
+          width: 236px;
+        }
+      
+        .hulikuled:after {
+          content: ".";
+          display: block;
+          height: 0;
+          clear: both;
+          visibility: hidden;
+        }
+      
+        @media (max-width: 768px) {
+          .hulikuled {
+            display: none;
+          }
+        }
+      </style>
+      
+      <div class="wp hulikuled" style="margin-top:0px;">
+        <div
+          style="background:url('https://img.alicdn.com/imgextra/i2/2210123621994/O1CN01vsOw3q1QbIiATHPkh_!!2210123621994.png'); text-align: center; height:80px; border: 0px solid #E8EFF5;border-radius: 8px;">
+          <div id="systimeshow"
+            style="float: left;margin-top: 10px; font-weight:bolder; color:#FF0000;font-size:16px;font-family: '微软正黑体','黑体_GB2312','微软正黑体'; width: 130px;">
+          </div>
+          <script language="javascript">
+            function getCurDate() {
+              var d = new Date();
+              var week;
+              switch (d.getDay()) {
+                case 1: week = "星期一"; break;
+                case 2: week = "星期二"; break;
+                case 3: week = "星期三"; break;
+                case 4: week = "星期四"; break;
+                case 5: week = "星期五"; break;
+                case 6: week = "星期六"; break;
+                default: week = "星期天";
+              }
+              var years = d.getFullYear();
+              var month = add_zero(d.getMonth() + 1);
+              var days = add_zero(d.getDate());
+              var hours = add_zero(d.getHours());
+              var minutes = add_zero(d.getMinutes());
+              var seconds = add_zero(d.getSeconds());
+
+              var ndate = years + "年" + month + "月" + days + "日" + "<br>" + hours + ":" + minutes + ":" + seconds + "&nbsp" + week + "&nbsp";
+
+              var divT = document.getElementById("systimeshow");
+              divT.innerHTML = ndate;
+            }
+            function add_zero(temp) {
+              if (temp < 10) return "0" + temp;
+              else return temp;
+            }
+            setInterval("getCurDate()", 100);
+          </script>
+      
+      
+          <div id="hulikuled_sx" style="width:auto;overflow:hidden;height:80px;line-height:80px;text-align:left;">
+            <div id="hulikuled_sx1">
+      
+              <p style="padding:0px 10px 0px 16px;vertical-align:middle;height:80px;overflow:hidden;">
+                <marquee direction="lelf" scrollamount="5"><strong>
+                     <a href="javascript:;" data-plan="vip_1" class="float-btn pay-vip my-custom-class-name"
+                      title="潇宇科技(cnxiaoyu.cn)">
+                      <span style="font-weight:900; color: #FF0000; font-size: 60px;line-height:80px;">
+                        中国星域俱乐部欢迎您！
+                      </span>
+                    </a>
+      
+                    <a href="javascript:;" data-plan="vip_1" class="float-btn pay-vip my-custom-class-name">
+                      <span
+                        style="font-family: 'Tahoma';font-weight:900; color: #4C33E5; font-size: 60px;line-height:80px;">
+                        中国星域俱乐部欢迎您！
+                      </span>
+                    </a>
+      
+                    <a href="javascript:;" data-plan="vip_1" class="float-btn pay-vip my-custom-class-name">
+                      <span
+                        style="font-family: 'Tahoma';font-weight:900; color: #FFFFFF; font-size: 60px;line-height:80px;">
+                        中国星域俱乐部欢迎您！
+                      </span>
+                    </a>
+                  </strong></marquee>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 空白区 -->
+      <div>
+        <br>
+        <br>
+      </div>
+
+      <div id="modal" class="modal" onclick="hideModal()">
+        <img id="modal-image" class="modal-image">
+      </div>
+
+      <!-- 统一操作卡片 -->
+      <div class="container mx-auto p-4 w-full space-y-8">
+        <div class="card bg-white p-6 rounded-lg shadow-md w-full space-y-4">
+          <div class="version-header p-4 bg-purple-500 rounded-t-lg">
+            <h2 class="text-xl font-bold text-white text-center flex items-center justify-center space-x-2">
+              <i class="fas fa-sync-alt"></i>
+              <span>活动信息与存档更新</span>
+            </h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <form id="combined-form" class="space-y-6">
+              <!-- 活动信息字段 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">活动名称</label>
+                  <input type="text" id="activity-name" class="w-full modern-input rounded-lg p-3 border" placeholder="某活动" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">活动日期</label>
+                  <input type="date" id="activity-date" class="w-full modern-input rounded-lg p-3 border" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">服务器</label>
+                  <input type="text" id="activity-server" class="w-full modern-input rounded-lg p-3 border" placeholder="某服务器" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">活动积分</label>
+                  <input type="number" id="activity-score" class="w-full modern-input rounded-lg p-3 border" placeholder="10" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">集合时间</label>
+                  <input type="time" id="activity-start-time" class="w-full modern-input rounded-lg p-3 border" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">发车时间</label>
+                  <input type="time" id="activity-end-time" class="w-full modern-input rounded-lg p-3 border" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">集合地点</label>
+                  <input type="text" id="activity-meeting-location" class="w-full modern-input rounded-lg p-3 border" placeholder="起点名称" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">最终终点</label>
+                  <input type="text" id="activity-final-destination" class="w-full modern-input rounded-lg p-3 border" placeholder="终点名称" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">路线图链接</label>
+                  <input type="url" id="activity-route-url" class="w-full modern-input rounded-lg p-3 border" placeholder="https://example.com/route（可选）">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">停车点链接</label>
+                  <input type="url" id="activity-parking-spot-url" class="w-full modern-input rounded-lg p-3 border" placeholder="https://example.com/parking（可选）">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">详情1链接</label>
+                  <input type="url" id="activity-detail-one-url" class="w-full modern-input rounded-lg p-3 border" placeholder="https://example.com/detail1（可选）">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">详情2链接</label>
+                  <input type="url" id="activity-detail-two-url" class="w-full modern-input rounded-lg p-3 border" placeholder="https://example.com/detail2（可选）">
+                </div>
+              </div>
+
+              <!-- 文件上传部分 -->
+              <div class="grid grid-cols-1 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">存档文件（ZIP格式）</label>
+                  <input type="file" id="combined-upload" accept=".zip" class="w-full border border-gray-300 rounded-md p-3">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">存档名称</label>
+                  <input type="text" id="combined-filename" class="w-full modern-input rounded-lg p-3 border" placeholder="存档名称打开压缩包复制里面的一长串文件名就是存档名称！" required>
+                </div>
+              </div>
+              
+              <!-- 统一提交按钮 -->
+              <button type="button" id="combined-submit" 
+                      class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-gradient-to-l transition duration-300 ease-in-out
+                            flex items-center justify-center">
+                <i class="fas fa-cloud-upload-alt mr-2"></i>
+                提交全部更新
+              </button>
+              
+              <!-- 进度指示 -->
+              <div id="combined-progress" class="hidden">
+                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div id="combined-progress-bar" class="h-full bg-blue-500 transition-all" style="width: 0%"></div>
+                </div>
+                <div id="combined-status" class="text-sm text-gray-700 mt-2"></div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 独立文件上传卡片 -->
+      <div class="container mx-auto p-4 w-full space-y-8">
+        <div class="card bg-white p-6 rounded-lg shadow-md w-full space-y-4">
+          <div class="version-header p-4 bg-blue-500 rounded-t-lg">
+            <h2 class="text-xl font-bold text-white text-center flex items-center justify-center space-x-2">
+              <i class="fas fa-upload"></i>
+              <span>独立文件更新</span>
+            </h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <form id="upload-form" class="space-y-6">
+              <div class="grid grid-cols-1 gap-6">
+                <div>
+                  <label for="filename" class="block text-sm font-medium text-gray-700">存档名</label>
+                  <input id="filename" type="text" placeholder="请输入存档文件名，同上一样的是一大串文件名，为存档名" class="w-full border border-gray-300 rounded-md p-3 mt-1 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                  <label for="upload" class="block text-sm font-medium text-gray-700">选择ZIP文件</label>
+                  <input id="upload" type="file" accept=".zip" class="w-full border border-gray-300 rounded-md p-3 mt-1 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+              </div>
+              <button type="button" id="upload-btn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-gradient-to-l transition duration-300 ease-in-out">
+                上传文件
+              </button>
+              <div id="progress-bar" class="hidden h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500" style="width: 0%"></div>
+              </div>
+              <div id="status-message" class="text-sm text-gray-700"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+    <!--End 页面主要内容-->
+
+    <!-- 自定义模态框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="modal-message" class="text-gray-700">确定要退出登录吗？</p>
+          </div>
+          <div class="flex justify-end space-x-4">
+              <button id="cancel-modal-btn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">取消</button>
+              <button id="confirm-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">确定</button>
+          </div>
+      </div>
+    </div>
+
+    <!-- 自定义模态框 - 错误提示 -->
+    <div id="error-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-red-600">提示</h3>
+              <button id="close-error-modal-btn" class="text-gray-500 hover:text-gray-700 transition duration-200 ease-in-out text-xl">&times;</button>
+          </div>
+          <div class="mb-4">
+              <p id="error-modal-message" class="text-gray-700">请先登录</p>
+          </div>
+          <div class="flex justify-end">
+              <button id="ok-error-modal-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 ease-in-out">确定</button>
+          </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 引入 jQuery -->
+<script src="../js/jquery-3.6.0.min.js"></script>
+<script src="../js/tus.js"></script>
+
+<script>
+  // 定义 getSettings 函数
+  async function getSettings() {
+    try {
+      const settings = await window.electronAPI.loadSettings();
+      return settings;
+    } catch (error) {
+      console.error('获取设置时出错:', error);
+      return {};
+    }
+  }
+
+  // 统一提交按钮的点击事件
+  document.getElementById('combined-submit').addEventListener('click', async function() {
+    const defaultImage = 'https://img.zcool.cn/community/017f6559609282a8012193a38ab993.gif'; // 默认图片
+    const getValueWithDefault = (selector) => {
+      const value = document.getElementById(selector).value.trim(); // 获取输入框的值并去除首尾空格
+      return value || defaultImage; // 空值则返回默认图片
+    };
+
+    const updateProgress = (percentage, message) => {
+      document.getElementById('combined-progress').classList.remove('hidden');
+      document.getElementById('combined-progress-bar').style.width = `${percentage}%`;
+      document.getElementById('combined-status').textContent = message;
+    };
+
+    try {
+      // 第一阶段：文件上传
+      updateProgress(30, '正在上传存档文件...');
+      
+      const file = document.getElementById('combined-upload').files[0];
+      const filename = document.getElementById('combined-filename').value.trim();
+
+      // 文件验证逻辑
+      if (!file) throw new Error('请选择存档文件');
+      if (!filename) throw new Error('请输入存档名称');
+      if (file.name.split('.').pop().toLowerCase() !== 'zip') throw new Error('仅支持ZIP格式');
+      if (file.size > 1024 * 1024 * 1024) throw new Error('文件大小不能超过1GB');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', filename);
+
+      const settings = await getSettings(); // 调用 getSettings 函数
+      const SERVER_IP = settings.serverIp || "127.0.0.1";
+      const WORKING_PORT = settings.workingPort || "3000";
+      const token = localStorage.getItem('jwtToken');
+      const operatorId = localStorage.getItem('operatorId');
+
+      if (!token || !operatorId) throw new Error('请先登录');
+
+      const uploadResponse = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/file/upload?operator=${encodeURIComponent(operatorId)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (!uploadResponse.ok) throw new Error('文件上传失败');
+      
+      // 第二阶段：活动信息提交
+      updateProgress(70, '正在提交活动信息...');
+      
+      const activityData = {
+        name: document.getElementById('activity-name').value,
+        server: document.getElementById('activity-server').value,
+        activityDate: document.getElementById('activity-date').value,
+        startTime: document.getElementById('activity-start-time').value,
+        endTime: document.getElementById('activity-end-time').value,
+        meetingLocation: document.getElementById('activity-meeting-location').value,
+        finalDestination: document.getElementById('activity-final-destination').value,
+        score: parseInt(document.getElementById('activity-score').value, 10),
+        // 使用默认图片
+        routeURL: getValueWithDefault('activity-route-url'),
+        parkingSpotURL: getValueWithDefault('activity-parking-spot-url'),
+        detailOneURL: getValueWithDefault('activity-detail-one-url'),
+        detailTwoURL: getValueWithDefault('activity-detail-two-url'),
+        fileName: filename // 将文件名提交到活动信息中
+      };
+
+      const activityResponse = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/activity?operator=${encodeURIComponent(operatorId)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(activityData)
+      });
+      
+      if (!activityResponse.ok) throw new Error('活动信息提交失败');
+
+      // 完成
+      updateProgress(100, '所有更新已完成！');
+      setTimeout(() => {
+        document.getElementById('combined-progress').classList.add('hidden');
+      }, 2000);
+
+    } catch (error) {
+      console.error('统一操作失败:', error);
+      updateProgress(0, `操作失败: ${error.message}`);
+      document.getElementById('combined-progress-bar').classList.add('bg-red-500');
+    }
+  });
+
+  // 独立上传按钮的点击事件
+  document.getElementById('upload-btn').addEventListener('click', async function() {
+    const file = document.getElementById('upload').files[0];
+    const filename = document.getElementById('filename').value.trim();
+
+    if (!file) return alert('请选择文件');
+    if (!filename) return alert('请输入文件名');
+
+    // 检查文件类型
+    const fileExt = file.name.split('.').pop().toLowerCase();
+    if (fileExt !== 'zip') {
+      return alert('仅支持ZIP格式');
+    }
+
+    // 检查文件大小（限制为1GB）
+    const maxSize = 1024 * 1024 * 1024; // 1GB
+    if (file.size > maxSize) {
+      return alert('文件大小不能超过1GB');
+    }
+
+    // 获取 Token 和 operatorId
+    const settings = await getSettings();
+    const SERVER_IP = settings.serverIp || "127.0.0.1";
+    const WORKING_PORT = settings.workingPort || "3000";
+    const token = localStorage.getItem('jwtToken');
+    const operatorId = localStorage.getItem('operatorId');
+
+    if (!token || !operatorId) {
+      return alert('请先登录');
+    }
+
+    // 创建 FormData 对象
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', filename);
+
+    try {
+      // 显示上传进度
+      const progressBar = document.getElementById('progress-bar');
+      const statusMessage = document.getElementById('status-message');
+      progressBar.style.display = 'block';
+      statusMessage.textContent = '上传中...';
+      statusMessage.style.color = 'blue';
+
+      // 发送上传请求
+      const uploadResponse = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/file/upload?operator=${encodeURIComponent(operatorId)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || '文件上传失败');
+      }
+
+      const uploadResult = await uploadResponse.json();
+      console.log('文件上传成功:', uploadResult);
+
+      // 提交文件名到活动信息
+      const activityData = {
+        fileName: filename // 仅提交文件名
+      };
+
+      const activityResponse = await fetch(`http://${SERVER_IP}:${WORKING_PORT}/activity/file?operator=${encodeURIComponent(operatorId)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(activityData)
+      });
+
+      if (!activityResponse.ok) {
+        const errorData = await activityResponse.json();
+        throw new Error(errorData.message || '文件名提交失败');
+      }
+
+      const activityResult = await activityResponse.json();
+      console.log('文件名提交成功:', activityResult);
+
+      // 更新进度条和状态信息
+      progressBar.style.width = '100%';
+      statusMessage.textContent = '文件上传且文件名提交成功';
+      statusMessage.style.color = 'green';
+      alert('文件上传且文件名提交成功！');
+    } catch (error) {
+      console.error('操作失败:', error);
+      alert(`操作失败: ${error.message}`);
+
+      // 更新进度条和状态信息
+      const progressBar = document.getElementById('progress-bar');
+      const statusMessage = document.getElementById('status-message');
+      progressBar.style.width = '0%';
+      statusMessage.textContent = '操作失败';
+      statusMessage.style.color = 'red';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../js/main.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    $('.search-bar .dropdown-menu a').click(function() {
+        var field = $(this).data('field') || '';
+        $('#search-field').val(field);
+        $('#search-btn').html($(this).text() + ' <span class="caret"></span>');
+    });
+});
+</script>
+</body>
+</html>

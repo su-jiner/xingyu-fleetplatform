@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时日志监控</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            background: url('./images/logger.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            border-radius: 16px;
+        }
+
+        /* 标题栏样式 */
+        #header {
+            width: 100%;
+            height: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 16px;
+            -webkit-app-region: no-drag;
+        }
+
+        /* 关闭按钮样式 */
+        #close-btn {
+            background-color: #f44336;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+        }
+
+        #close-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* 日志容器样式 */
+        #logs-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+        }
+
+        /* 日志条目样式 */
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        /* 不同日志级别的颜色 */
+        .info {
+            background-color: rgba(0, 200, 83, 0.2);
+            color: #00c853;
+        }
+        .warn {
+            background-color: rgba(255, 165, 0, 0.2);
+            color: #ff8800;
+        }
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        /* 滚动条样式 */
+        #logs-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #logs-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+        #logs-container::-webkit-scrollbar-track {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 加载提示样式 */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 18px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        /* 日期选择器样式 */
+        #date-selector {
+            margin: 10px 0;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+
+        /* 连接状态指示器 */
+        #connection-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff5722;
+            transition: background-color 0.3s;
+        }
+
+        #connection-status.connected {
+            background-color: #4caf50;
+        }
+
+        #connection-status.disconnected {
+            background-color: #f44336;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 标题栏 -->
+    <div id="header">
+        <h1>实时日志监控</h1>
+        <button id="close-btn" onclick="handleCloseApp()">&times;</button>
+    </div>
+
+    <!-- 日期选择器 -->
+    <select id="date-selector" onchange="loadSelectedDateLogs()">
+        <option value="all">全部日志</option>
+    </select>
+
+    <!-- 日志容器 -->
+    <div id="logs-container">
+        <div id="logs"></div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div id="loading">正在加载日志...</div>
+
+    <!-- 连接状态指示器 -->
+    <div id="connection-status" title="连接状态"></div>
+
+    <script>
+        // 全局配置
+        const config = {
+            apiBaseUrl: 'http://localhost:3000', // 改为HTTP协议
+            wsPort: 8081,
+            maxRetries: 5,
+            retryDelay: 3000
+        };
+
+        // 全局变量
+        const logsContainer = document.getElementById('logs');
+        const dateSelector = document.getElementById('date-selector');
+        const loadingElement = document.getElementById('loading');
+        const statusElement = document.getElementById('connection-status');
+        let retryCount = 0;
+        let ws = null;
+
+        function handleCloseApp() {
+            if (window.electronAPI) {
+                window.electronAPI.closeLoggerWindow();
+            } else {
+                window.close();
+            }
+        }
+
+        // 增强的API请求函数
+        async function safeFetch(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP错误 ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`请求失败: ${url}`, error);
+                addLogEntry(`[ERROR] 请求失败: ${url.split('/').pop()} - ${error.message}`);
+                throw error;
+            }
+        }
+
+        // 初始化函数
+        async function init() {
+            // 加载可用日期
+            await loadAvailableDates();
+            
+            // 加载所有日志
+            await loadAllLogs();
+            
+            // 连接WebSocket
+            connectWebSocket();
+        }
+
+        // 加载可用日期
+        async function loadAvailableDates() {
+            try {
+                const { dates } = await safeFetch(`${config.apiBaseUrl}/logs/dates`);
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    dateSelector.appendChild(option);
+                });
+            } catch (error) {
+                addLogEntry('[ERROR] 加载日期列表失败，请检查服务器连接');
+            }
+        }
+
+        // 加载所有日志
+        async function loadAllLogs() {
+            loadingElement.style.display = 'block';
+            logsContainer.innerHTML = '';
+            
+            try {
+                const { dates } = await safeFetch(`${config.apiBaseUrl}/logs/dates`);
+                const sortedDates = dates.sort().reverse();
+                
+                for (const date of sortedDates) {
+                    try {
+                        const { logs } = await safeFetch(`${config.apiBaseUrl}/logs/${date}`);
+                        logs.sort().forEach(log => addLogEntry(log));
+                    } catch (e) {
+                        continue; // 跳过失败的日期
+                    }
+                }
+            } catch (error) {
+                addLogEntry('[ERROR] 初始化加载日志失败，请检查服务器连接');
+            } finally {
+                loadingElement.style.display = 'none';
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+        }
+
+        // 加载选定日期的日志
+        async function loadSelectedDateLogs() {
+            const selectedDate = dateSelector.value;
+            
+            if (selectedDate === 'all') {
+                await loadAllLogs();
+                return;
+            }
+            
+            loadingElement.style.display = 'block';
+            logsContainer.innerHTML = '';
+            
+            try {
+                const { logs } = await safeFetch(`${config.apiBaseUrl}/logs/${selectedDate}`);
+                logs.sort().forEach(log => addLogEntry(log));
+            } catch (error) {
+                addLogEntry('[ERROR] 加载日志失败: ' + error.message);
+            } finally {
+                loadingElement.style.display = 'none';
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+        }
+
+        // 添加日志条目
+        function addLogEntry(logEntry) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            if (logEntry.includes('[INFO]')) {
+                entry.classList.add('info');
+            } else if (logEntry.includes('[WARN]')) {
+                entry.classList.add('warn');
+            } else if (logEntry.includes('[ERROR]')) {
+                entry.classList.add('error');
+            }
+            
+            entry.textContent = logEntry;
+            logsContainer.appendChild(entry);
+        }
+
+        // 连接WebSocket
+        function connectWebSocket() {
+            statusElement.className = '';
+            statusElement.title = '正在连接...';
+            
+            ws = new WebSocket(`ws://localhost:${config.wsPort}`);
+            
+            ws.onopen = () => {
+                retryCount = 0;
+                statusElement.className = 'connected';
+                statusElement.title = '实时连接已建立';
+                addLogEntry('[INFO] 实时日志连接已建立');
+            };
+            
+            ws.onmessage = (event) => {
+                addLogEntry(event.data);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            };
+            
+            ws.onclose = () => {
+                statusElement.className = 'disconnected';
+                statusElement.title = '连接已断开';
+                
+                if (retryCount < config.maxRetries) {
+                    retryCount++;
+                    const delay = Math.min(config.retryDelay, retryCount * 1000);
+                    addLogEntry(`[INFO] 连接断开，${delay/1000}秒后重试 (${retryCount}/${config.maxRetries})`);
+                    setTimeout(connectWebSocket, delay);
+                } else {
+                    addLogEntry('[ERROR] 无法建立实时日志连接');
+                }
+            };
+            
+            ws.onerror = (error) => {
+                statusElement.className = 'disconnected';
+                statusElement.title = '连接错误';
+                addLogEntry(`[ERROR] WebSocket错误: ${error.message}`);
+            };
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
